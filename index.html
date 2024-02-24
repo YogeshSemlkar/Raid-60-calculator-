@@ -1,103 +1,91 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="style.css">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RAID 60 Calculator</title>
-  <link rel="stylesheet" href="styles.css">
- 
-</head>
-<body>
-  <div class="container">
-    <h2>RAID 60 Calculator</h2>
-    <form id="raidForm">
-      <div class="form-group">
-        <label for="numDrives">Number of Drives:</label>
-        <input type="number" id="numDrives" required>
-      </div>
-      <div class="form-group">
-        <label for="driveCapacity">Drive Capacity (GB):</label>
-        <input type="number" id="driveCapacity" required>
-      </div>
-      <button type="submit">Calculate</button>
-    </form>
-    <div id="result"></div>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAID 0 Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        #calculator {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 16px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        #result {
-            margin-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAID 60 Calculator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+</style>
 </head>
 <body>
 
-<div id="calculator">
-    <label for="numDrives">Number of Drives:</label>
-    <input type="number" id="numDrives" placeholder="Enter number of drives" required>
+<div class="container">
+    <h2>RAID 60 Calculator</h2>
+    <label for="numDisks">Number of Disks:</label>
+    <input type="number" id="numDisks" placeholder="Enter the number of disks">
 
-    <label for="driveCapacity">Drive Capacity (GB):</label>
-    <input type="number" id="driveCapacity" placeholder="Enter drive capacity" required>
+    <label for="diskSizeGB">Disk Size (GB):</label>
+    <input type="number" id="diskSizeGB" placeholder="Enter the size of each disk in GB">
 
-    <label for="driveSpeed">Drive Speed (MB/s):</label>
-    <input type="number" id="driveSpeed" placeholder="Enter drive speed" required>
+    <button onclick="calculateTotalUsableStorage()">Calculate</button>
 
-    <button onclick="calculateRAID0()">Calculate RAID 0</button>
-
-    <div id="result"></div>
+    <p id="result" style="display: none;"></p>
 </div>
 
 <script>
-    function calculateRAID0() {
-        const numDrives = parseInt(document.getElementById("numDrives").value);
-        const driveCapacity = parseInt(document.getElementById("driveCapacity").value);
-        const driveSpeed = parseInt(document.getElementById("driveSpeed").value);
+    function calculateTotalUsableStorage() {
+        const numDisks = parseInt(document.getElementById('numDisks').value);
+        const diskSizeGB = parseFloat(document.getElementById('diskSizeGB').value);
+        
+        if (isNaN(numDisks) || isNaN(diskSizeGB) || numDisks <= 0 || diskSizeGB <= 0) {
+            alert("Please enter valid numbers.");
+            return;
+        }
 
-        const totalCapacity = numDrives * driveCapacity;
-        const totalSpeed = numDrives * driveSpeed;
+        // Define RAID configuration
+        const numDataStripesPerRAID6 = 4; // Number of data disks per RAID 6 array
+        const numParityStripesPerRAID6 = 2; // Number of parity disks per RAID 6 array
+        const numRAID6Arrays = 2; // Number of RAID 6 arrays
 
-        const resultElement = document.getElementById("result");
-        resultElement.innerHTML = `<p>RAID 0 Total Capacity: ${totalCapacity} GB</p>
-                                   <p>RAID 0 Total Speed: ${totalSpeed} MB/s</p>`;
+        // Calculate usable storage for RAID 6 arrays
+        const totalDataStorageRAID6 = (numDataStripesPerRAID6 * diskSizeGB) * numRAID6Arrays;
+        const totalParityStorageRAID6 = (numParityStripesPerRAID6 * diskSizeGB) * numRAID6Arrays;
+        const totalRAID6Storage = totalDataStorageRAID6 + totalParityStorageRAID6;
+
+        // Calculate usable storage for RAID 0 arrays
+        const numDataStripesPerRAID0 = numDataStripesPerRAID6 * numRAID6Arrays; // Number of data disks per RAID 0 array
+        const totalDataStorageRAID0 = numDataStripesPerRAID0 * diskSizeGB;
+
+        // Calculate total usable storage
+        const totalUsableStorageGB = totalRAID6Storage + totalDataStorageRAID0;
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').innerText = `Total usable storage: ${totalUsableStorageGB.toFixed(2)} GB`;
     }
 </script>
 
